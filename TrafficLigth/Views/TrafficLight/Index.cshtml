@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Traffic Light Control";
+}
+
+<h2>Traffic Light Control</h2>
+
+<div>
+    <h3>North Traffic Light: @ViewBag.NorthLight</h3>
+    <h3>South Traffic Light: @ViewBag.SouthLight</h3>
+    <h3>East Traffic Light: @ViewBag.EastLight</h3>
+    <h3>West Traffic Light: @ViewBag.WestLight</h3>
+    <h3>North Right Turn Light: @ViewBag.NorthRightTurnLight</h3>
+</div>
+
+
+
+
+<form asp-action="LoadLight" method="post">   
+    <button type="submit">Submit</button>
+</form>
+
+<form asp-action="GetLatestColor" method="get">
+    <button type="submit">Submit</button>
+</form>
