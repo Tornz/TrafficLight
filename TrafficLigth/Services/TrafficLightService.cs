@@ -10,19 +10,18 @@ public class TrafficLightService : BackgroundService
     private readonly ILogger<TrafficLightService> _logger;
     private readonly IHubContext<TrafficLightHub> _hubContext;
     private Timer _timer;
-    private string _currentLightStateNS;
-    private string _currentLightStateEW;
-    private DateTime _lastChangeTimeNS;
-    private DateTime _lastChangeTimeEW;
+    private string _currentLightState;
+    
+    private DateTime _lastChangeTime;
+    
 
     public TrafficLightService(ILogger<TrafficLightService> logger, IHubContext<TrafficLightHub> hubContext)
     {
         _logger = logger;
         _hubContext = hubContext;
-        _currentLightStateNS = "NSGreen"; // Starting state
-        _currentLightStateEW = "EWGreen";
-        _lastChangeTimeNS = DateTime.Now;
-        _lastChangeTimeEW = DateTime.Now;
+        _currentLightState = "NSGreen"; // Starting state        
+        _lastChangeTime = DateTime.Now;
+        
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,74 +34,80 @@ public class TrafficLightService : BackgroundService
     {
         var now = DateTime.Now;
         var isPeakTime = (now.Hour >= 8 && now.Hour < 10) || (now.Hour >= 17 && now.Hour < 19);
-        var greenDuration = isPeakTime ? 40 : 20;
-        var eastWestGreenDuration = isPeakTime ? 10 : 20;
+        var greenDuration = isPeakTime ? 40 : 10;
+        var eastWestGreenDuration = isPeakTime ? 10 : 10;
 
-        switch (_currentLightStateNS)
+        switch (_currentLightState)
         {
             case "NSGreen":
-                if ((now - _lastChangeTimeNS).TotalSeconds >= greenDuration)
+                if ((now - _lastChangeTime).TotalSeconds >= greenDuration)
                 {
-                    _currentLightStateNS = "NSYellow";
-                    _lastChangeTimeNS = now;
+                    _currentLightState = "NSYellow";
+                    _lastChangeTime = now;
                 }
                 break;
             case "NSYellow":
-                if ((now - _lastChangeTimeNS).TotalSeconds >= 5)
+                if ((now - _lastChangeTime).TotalSeconds >= 5)
                 {
-                    _currentLightStateNS = "AllRed";
-                    _lastChangeTimeNS = now;
+                    _currentLightState = "NSRed";
+                    _lastChangeTime = now;
                 }
                 break;
-            case "AllRed":
-                if ((now - _lastChangeTimeNS).TotalSeconds >= 4)
-                {
-                    if (isPeakTime)
-                    {
-                        _currentLightStateNS = "NSGreenRightTurn";
-                    }
-                    _currentLightStateNS = "NSGreen";
-                    _lastChangeTimeNS = now;
+            case "NSRed":
+                if ((now - _lastChangeTime).TotalSeconds >= 4)
+                {                   
+                    _currentLightState = "EWGreen";
+                    _lastChangeTime = now;
                 }
                 break;
-            case "NSGreenRightTurn":
-                if ((now - _lastChangeTimeNS).TotalSeconds >= 10)
-                {
-                    _currentLightStateNS = "NSGreen";
-                    _lastChangeTimeNS = now;
-                }
-
-                break;
-        }
-
-        switch (_currentLightStateEW)
-        {
             case "EWGreen":
-                if ((now - _lastChangeTimeEW).TotalSeconds >= eastWestGreenDuration)
+                if ((now - _lastChangeTime).TotalSeconds >= eastWestGreenDuration)
                 {
-                    _currentLightStateEW = "EWYellow";
-                    _lastChangeTimeEW = now;
+                    _currentLightState = "EWYellow";
+                    _lastChangeTime = now;
                 }
                 break;
+
             case "EWYellow":
-                if ((now - _lastChangeTimeEW).TotalSeconds >= 5)
+                if ((now - _lastChangeTime).TotalSeconds >= 5)
                 {
-                    _currentLightStateEW = "AllRed";
-                    _lastChangeTimeEW = now;
+                    _currentLightState = "EWRed";
+                    _lastChangeTime = now;
                 }
                 break;
-            case "AllRed":
-                if ((now - _lastChangeTimeEW).TotalSeconds >= 4)
+
+            case "EWRed":
+                if ((now - _lastChangeTime).TotalSeconds >= 4)
                 {
-                    _currentLightStateEW = "EWGreen";
-                    _lastChangeTimeEW = now;
+                    _currentLightState = "NSGreenRightTurn";
+                    _lastChangeTime = now;
+                }
+                break;
+
+            case "NSGreenRightTurn":
+                if ((now - _lastChangeTime).TotalSeconds >= 10)
+                {
+                    _currentLightState = "NSGreenRightTurnYellow";
+                    _lastChangeTime = now;
+                }
+                break;
+
+            case "NSGreenRightTurnYellow":
+                if ((now - _lastChangeTime).TotalSeconds >= 5)
+                {
+                    _currentLightState = "NSGreenRightTurnRed";
+                    _lastChangeTime = now;
+                }
+                break;
+            case "NSGreenRightTurnRed":
+                if ((now - _lastChangeTime).TotalSeconds >= 4)
+                {
+                    _currentLightState = "NSGreen";
+                    _lastChangeTime = now;
                 }
                 break;
         }
-
-        await _hubContext.Clients.All.SendAsync("UpdateLightStateEW", _currentLightStateEW);
-
-        await _hubContext.Clients.All.SendAsync("UpdateLightState", _currentLightStateNS);
+        await _hubContext.Clients.All.SendAsync("UpdateLightState", _currentLightState);
     }
 
 

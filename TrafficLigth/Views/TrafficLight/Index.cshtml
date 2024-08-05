@@ -25,54 +25,54 @@
                     case "NSGreen":
                         document.getElementById("north").innerText = "Green";
                         document.getElementById("south").innerText = "Green";
-                        document.getElementById("northright").innerText = "Green";                   
+                        document.getElementById("east").innerText = "Red";
+                        document.getElementById("west").innerText = "Red";
+                        document.getElementById("northright").innerText = "Red";
                         break;
                     case "NSYellow":
                         document.getElementById("north").innerText = "Yellow";
-                        document.getElementById("south").innerText = "Yellow";
-                        document.getElementById("northright").innerText = "Yellow";                    
+                        document.getElementById("south").innerText = "Yellow";                                
+                        break;                
+                    case "NSRed":
+                        document.getElementById("north").innerText = "Red";
+                        document.getElementById("south").innerText = "Red";                  
                         break;
-                    case "NSGreenRightTurn":
-                        document.getElementById("northright").innerText = "Green";
-                        break;                    
-                    case "AllRed":
-                    default:
+                    case "EWGreen":
                         document.getElementById("north").innerText = "Red";
                         document.getElementById("south").innerText = "Red";
-                        document.getElementById("northright").innerText = "Red";                      
-                        break;
-                }                
-            });
-
-
-            connection.on("UpdateLightStateEW", function (state) {
-                debugger
-                // Reset all lights
-                document.querySelectorAll(".light").forEach(light => {
-                    light.style.backgroundColor = "gray";
-                });
-                console.log(state);
-
-                // Set the active light based on the state
-                switch (state) {          
-                    case "EWGreen":
+                        document.getElementById("northright").innerText = "Red";
                         document.getElementById("east").innerText = "Green";
                         document.getElementById("west").innerText = "Green";
-                
                         break;
                     case "EWYellow":
                         document.getElementById("east").innerText = "Yellow";
                         document.getElementById("west").innerText = "Yellow";
-       
-                        break;
-                    case "AllRed":
-                    default:
+                        break;                 
+                    case "EWRed":             
                         document.getElementById("east").innerText = "Red";
                         document.getElementById("west").innerText = "Red";
-      
                         break;
-                }
+                    case "NSGreenRightTurn":
+                        document.getElementById("northright").innerText = "Green";
+                        document.getElementById("north").innerText = "Green";
+                        document.getElementById("south").innerText = "Red";
+                        document.getElementById("east").innerText = "Red";
+                        document.getElementById("west").innerText = "Red";
+                        break;
+                    case "NSGreenRightTurnYellow":
+                        document.getElementById("northright").innerText = "Yellow";                    
+                        break;
+                    case "NSGreenRightTurnRed":
+                        document.getElementById("northright").innerText = "Red";
+                        break;
+                    default:
+                        break;
+                      
+                }                
             });
+
+
+           
             connection.start().catch(function (err) {
                 return console.error(err.toString());
             });
