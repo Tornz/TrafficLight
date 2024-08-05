@@ -1,24 +1,81 @@
-﻿@{
+﻿
+@{
     ViewData["Title"] = "Traffic Light Control";
 }
-
-<h2>Traffic Light Control</h2>
-
 <div>
-    <h3>North Traffic Light: @ViewBag.NorthLight</h3>
-    <h3>South Traffic Light: @ViewBag.SouthLight</h3>
-    <h3>East Traffic Light: @ViewBag.EastLight</h3>
-    <h3>West Traffic Light: @ViewBag.WestLight</h3>
-    <h3>North Right Turn Light: @ViewBag.NorthRightTurnLight</h3>
+    <h3>North Traffic Light:<span id="north"></span> </h3>
+    <h3>South Traffic Light:<span id="south"></span> </h3>
+    <h3>East Traffic Light:<span id="east"></span> </h3>
+    <h3>West Traffic Light:<span id="west"></span></h3>
+    <h3>North Right Turn Light:<span id="northright"></h3>
 </div>
 
 
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function () {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/trafficLightHub")
+                .build();
+
+            connection.on("UpdateLightState", function (state) {                      
+                // Set the active light based on the state
+                switch (state) {
+                    case "NSGreen":
+                        document.getElementById("north").innerText = "Green";
+                        document.getElementById("south").innerText = "Green";
+                        document.getElementById("northright").innerText = "Green";                   
+                        break;
+                    case "NSYellow":
+                        document.getElementById("north").innerText = "Yellow";
+                        document.getElementById("south").innerText = "Yellow";
+                        document.getElementById("northright").innerText = "Yellow";                    
+                        break;
+                    case "NSGreenRightTurn":
+                        document.getElementById("northright").innerText = "Green";
+                        break;                    
+                    case "AllRed":
+                    default:
+                        document.getElementById("north").innerText = "Red";
+                        document.getElementById("south").innerText = "Red";
+                        document.getElementById("northright").innerText = "Red";                      
+                        break;
+                }                
+            });
 
 
-<form asp-action="LoadLight" method="post">   
-    <button type="submit">Submit</button>
-</form>
+            connection.on("UpdateLightStateEW", function (state) {
+                debugger
+                // Reset all lights
+                document.querySelectorAll(".light").forEach(light => {
+                    light.style.backgroundColor = "gray";
+                });
+                console.log(state);
 
-<form asp-action="GetLatestColor" method="get">
-    <button type="submit">Submit</button>
-</form>
+                // Set the active light based on the state
+                switch (state) {          
+                    case "EWGreen":
+                        document.getElementById("east").innerText = "Green";
+                        document.getElementById("west").innerText = "Green";
+                
+                        break;
+                    case "EWYellow":
+                        document.getElementById("east").innerText = "Yellow";
+                        document.getElementById("west").innerText = "Yellow";
+       
+                        break;
+                    case "AllRed":
+                    default:
+                        document.getElementById("east").innerText = "Red";
+                        document.getElementById("west").innerText = "Red";
+      
+                        break;
+                }
+            });
+            connection.start().catch(function (err) {
+                return console.error(err.toString());
+            });
+        });
+    </script>
+}
