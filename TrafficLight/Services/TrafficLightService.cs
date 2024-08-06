@@ -34,8 +34,8 @@ public class TrafficLightService : BackgroundService
     {
         var now = DateTime.Now;
         var isPeakTime = (now.Hour >= 8 && now.Hour < 10) || (now.Hour >= 17 && now.Hour < 19);
-        var greenDuration = isPeakTime ? 40 : 10;
-        var eastWestGreenDuration = isPeakTime ? 10 : 10;
+        var greenDuration = isPeakTime ? 40 : 20;
+        var eastWestGreenDuration = isPeakTime ? 10 : 20;
 
         switch (_currentLightState)
         {
